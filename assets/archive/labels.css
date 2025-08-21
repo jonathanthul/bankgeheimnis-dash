@@ -1,0 +1,49 @@
+/* Remove tooltip arrow entirely */
+.leaflet-tooltip.distance-label::before,
+.leaflet-tooltip.distance-label::after {
+  display: none !important;
+}
+
+.leaflet-tooltip.distance-label {
+  background: transparent; /* no background box */
+  border: none;             /* no border */
+  padding: 0;               /* remove padding */
+  box-shadow: none;         /* no shadow box */
+
+  color: black;             /* main text color */
+  font-size: 12px;
+  font-weight: 600;
+
+  /* white outline around black text */
+  text-shadow:
+    -1px -1px 0 white,
+     1px -1px 0 white,
+    -1px  1px 0 white,
+     1px  1px 0 white,
+    -2px  0   0 white,
+     2px  0   0 white,
+     0   -2px 0 white,
+     0    2px 0 white;
+}
+
+.leaflet-tooltip.shop-label {
+  background: transparent; /* no background box */
+  border: none;             /* no border */
+  padding: 0;               /* remove padding */
+  box-shadow: none;         /* no shadow box */
+
+  color: black;             /* main text color */
+  font-size: 12px;
+  font-weight: 600;
+
+  /* white outline around black text */
+  text-shadow:
+    -1px -1px 0 white,
+     1px -1px 0 white,
+    -1px  1px 0 white,
+     1px  1px 0 white,
+    -2px  0   0 white,
+     2px  0   0 white,
+     0   -2px 0 white,
+     0    2px 0 white;
+}

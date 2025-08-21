@@ -1,0 +1,11 @@
+/* assets/cluster.css */
+.my-cluster-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: black;
+    -webkit-text-stroke: 1px white;
+    width: 100%;
+    height: 100%;
+}

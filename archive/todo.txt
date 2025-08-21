@@ -1,0 +1,11 @@
+bench link box is really ugly right now, also doesn't close when the bench gets filtered out, also would be good if it had a close-button that affected the selected bench
+option to hide filter sliders, especially for mobile
+only render things in viewport for performance?
+change slider sensitivity?
+have the benches be more clustered when you zoom out all the way
+get user location?
+make map more vibey with cool colors
+make div boxes prettier
+make mobile friendly
+
+done
