@@ -95,7 +95,7 @@ draw_bench = assign("""function(feature, latlng){
 }""")
 
 # Initialize Dash app
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, title="bankgeheimnis")
 server = app.server
 
 # Layout with map and GeoJSON overlay
@@ -106,7 +106,7 @@ app.layout = html.Div([
         html.Label("Entfernung zur nächsten öff. Toilette", htmlFor="toilet_slider"),
         dcc.RangeSlider(
             min=0, max=slider_bounds["toilet_max"], step=10, value=[0,200], marks=None, tooltip={"placement": "bottom", "always_visible": True, "style": {"color": "White", "fontSize": "14px"}, "template": "{value} m"},
-            id="toilet_slider",
+            id="toilet-slider",
             updatemode='mouseup' #only updates when the user stops clicking, avoiding redrawing constantly
             #marks=None,
             #tooltip={"placement": "bottom", "always_visible": True}
@@ -114,25 +114,28 @@ app.layout = html.Div([
         html.Label("Entfernung zum nächsten Laden", htmlFor="shop_slider"),
         dcc.RangeSlider(
             min=0, max=slider_bounds["shop_max"], step=10, value=[0,300], marks=None, tooltip={"placement": "bottom", "always_visible": True, "style": {"color": "White", "fontSize": "14px"}, "template": "{value} m"},
-            id="shop_slider",
+            id="shop-slider",
             updatemode='mouseup'
         ),
         html.Label("Entfernung zur nächsten großen Straße", htmlFor="street_slider"),
         dcc.RangeSlider(
             min=0, max=slider_bounds["street_max"], step=10, value=[0,1000], marks=None, tooltip={"placement": "bottom", "always_visible": True, "style": {"color": "White", "fontSize": "14px"}, "template": "{value} m"},
-            id="street_slider",
+            id="street-slider",
             updatemode='mouseup',
         ),
         dcc.Checklist(
             options=[{"label": "Kiffen erlaubt", "value": "kiffen"}],
             value=[],
-            id="kiffen_checkbox"
+            id="kiffen-checkbox"
         ),
         html.Label("Zähle Bänke", id="bench-count"),
         ]),
     html.Div(id="bench-info-box"),
 
+    # Store selected bench
     dcc.Store(id="selected-bench", data=None),
+    # Store filtered benches
+    dcc.Store(id="filtered-benches-store"),
 
     dl.Map(id="map", center=[51.2277, 6.7735], zoom=13, preferCanvas=True, children=[
         dl.TileLayer(
@@ -160,116 +163,79 @@ app.layout = html.Div([
 ])
 
 @app.callback(
-    Output("bench-layer", "data"),
+    Output("filtered-benches-store", "data"),
     Output("bench-count", "children"),
-    Output("nichtkiffen-layer", "children"),
 
-    Input("toilet_slider", "value"),
-    Input("shop_slider", "value"),
-    Input("street_slider", "value"),
-    Input("kiffen_checkbox", "value"),
-    Input("selected-bench", "data"),
+    Input("toilet-slider", "value"),
+    Input("shop-slider", "value"),
+    Input("street-slider", "value"),
+    Input("kiffen-checkbox", "value")
 )
 
-def filter_benches(toilet_range: list, shop_range: list, street_range: list, kiffen: list, selected_bench):
-    features = benches_geojson["features"] #grab the list of benches from the GeoJSON file
+def filter_benches2(toilet_range, shop_range, street_range, kiffen):
 
-    #print statements for debug purposes
-    print("toilet_range:", toilet_range)
-    print("shop_range:", shop_range)
-    print("street_range:", street_range)
-    print("kiffen_checkbox:", kiffen)
-    print(f"filter_benches selected-bench: {selected_bench}")
-
-    filtered_benches = [f for f in features 
-                if f["properties"].get("toilet_dist") is not None and
-                    toilet_range[0] <= f["properties"]["toilet_dist"] <= toilet_range[1]
-                and f["properties"].get("shop_dist") is not None and
-                    shop_range[0] <= f["properties"]["shop_dist"] <= shop_range[1]
-                and f["properties"].get("street_dist") is not None and
-                    street_range[0] <= f["properties"]["street_dist"] <= street_range[1]  
-                and (f["properties"]["kiffen_erlaubt"] or ("kiffen" not in kiffen))
+    benches = benches_geojson["features"]
+    
+    filtered_benches = [bench for bench in benches
+                if bench["properties"].get("toilet_dist") is not None and
+                    toilet_range[0] <= bench["properties"]["toilet_dist"] <= toilet_range[1]
+                and bench["properties"].get("shop_dist") is not None and
+                    shop_range[0] <= bench["properties"]["shop_dist"] <= shop_range[1]
+                and bench["properties"].get("street_dist") is not None and
+                    street_range[0] <= bench["properties"]["street_dist"] <= street_range[1]  
+                and (bench["properties"]["kiffen_erlaubt"] or ("kiffen" not in kiffen))
                 ]
     
-    #print statement for debug
-    print(f"Number of filtered benches: {len(filtered_benches)}")
+    print(f"filter_benches2: {len(filtered_benches)} filtered benches.")
 
-    # Add popup HTML string to each feature
-    # this is essentially what you did in the create_bench_marker function, except you pass it to a built-in dl.GeoJSON thing in the end
-    for f in filtered_benches:
-        #fetch the relevant numbers to make the subsequent code easier to read
-        street_dist = f["properties"]["street_dist"]
-        nichtkiffen_text = "Kiffen nicht erlaubt"
-        if f["properties"]["kiffen_erlaubt"]:
-            nichtkiffen_text = "Kiffen erlaubt"
+    return filtered_benches, f'{len(filtered_benches)} Bänke gefunden.'
 
-        lat, lon = f["geometry"]["coordinates"][1], f["geometry"]["coordinates"][0]
-        nav_url = f"https://www.google.com/maps/search/?api=1&query={lat},{lon}"
+@app.callback(
+    Output("bench-layer", "data"), #Outputs the geojson that actually gets displayed
 
-        #build a big string containing html code that shoud be shown when clicking on a bench marker
-        popup_html = (
-            f'<a href="{nav_url}" target="_blank">In Google Maps öffnen.</a>'
-        )
+    Input("filtered-benches-store", "data"), #Takes the list of filtered benches
+    Input("selected-bench", "data"), #And info on the selected bench
+)
 
-        f_id = f["properties"]["id"] #fetch ID for bench
-        f["properties"]["selected"] = (f_id == selected_bench) #Add a bool property that's true if that's the selected bench
+def update_bench_layer(filtered_benches, selected_bench):
+    if not filtered_benches: return {"type": "FeatureCollection", "features": []} #Safety thing?
 
+    for bench in filtered_benches:
+        bench["properties"]["selected"] = (bench["properties"]["id"] == selected_bench) #Set the property as the appropriate truth value
+
+    #Turn the list of benches into the correct format for dl.GeoJSON
     filtered_geojson = {
     "type": "FeatureCollection",
     "features": filtered_benches
-    }
+    }    
+    
+    return filtered_geojson
 
-    nichtkiffen_layer = dl.GeoJSON(
-        data=nichtkiffen_geojson,
-        options=dict(style=dict(color="red", weight=1, fillOpacity=0.05))
-    ) if kiffen else None
+@app.callback(
+    Output("nichtkiffen-layer", "children"),
+    Input("kiffen-checkbox", "value"),
+)
 
-    return (
-        filtered_geojson, #this list might contain the children for the output?
-        f"{len(filtered_benches)} Bänke gefunden.",
-        nichtkiffen_layer,
-        )
-# this stacks because, if you had already checked the toilet filter, that filtered list is being filtered again after checking another box!
+def update_nichtkiffen_layer(checkbox_value):
+    nichtkiffen_layer = dl.GeoJSON(data=nichtkiffen_geojson, options=dict(style=dict(color="red", weight=1, fillOpacity=0.05))) if checkbox_value else None
+    return nichtkiffen_layer
 
 @app.callback(
     Output("selected-bench", "data"),
-
     Input("bench-layer", "clickData"),
-    Input("map", "clickData"),
-
     State("selected-bench", "data"),
-    prevent_initial_call=True
+    prevent_initial_call=True,
 )
-def update_selected_bench(clicked_bench, map_click, selected_id):
-    trigger_id = ctx.triggered_id  # which input triggered this callback
-    print(f"update_selected_bench triggered by: {trigger_id}")
 
-    if trigger_id == "bench-layer" and clicked_bench:
-        bench_id = clicked_bench["properties"]["id"]
-        # toggle selection if the same bench is clicked again
-        return None if bench_id == selected_id else bench_id
+def update_selected(clicked_bench, selected_id):
+    if clicked_bench:
+        #fetch id of clicked bench
+        clicked_id = clicked_bench["properties"]["id"] 
+        #compare it to id of currently selected bench. Unselected the bench if its the same, otherwise update currently selected bench
+        return None if clicked_id == selected_id else clicked_id
+    #don't do anything if no bench was clicked
+    return dash.no_update
 
-    if trigger_id == "map" and map_click: #This also leads to the bench being unselected when double-clicking to zoom. Also strange behavior follows when then clicking the same bench again. Turned off for now.
-        # clicked on empty map space → deselect
-        pass#return None
-
-    return dash.no_update #If none of these antecedents is true, just do nothin
-
-'''
-@app.callback(
-    Output("selected-bench", "data"),
-    Input("bench-layer", "clickData"),
-    prevent_initial_call=True
-)
-def store_selected_bench(clickData):
-    if not clickData:
-        return None
-    props = clickData.get("properties", {})
-    bench_id = props.get("id")
-    # toggle behavior (optional): deselect if clicking the already selected bench
-    # You can implement toggling if you desire by comparing with a prior store value (requires more complexity).
-    return bench_id
-'''
 @app.callback(
         Output("nearby-layer", "children"), #updates the nearby markers
 
