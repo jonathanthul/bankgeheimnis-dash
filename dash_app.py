@@ -9,6 +9,7 @@ import json
 PLACE_NAME = "rhein-ruhr"
 
 app = dash.Dash(__name__, title="bankgeheimnis")
+server = app.server
 
 # tell python to use the drawBench function declared in the javascript file. This is a weird workaround where you tell it call an arrow function that calls your original function, but it's the only way to make it work without having dash-extensions look for a nonexistent function0
 draw_bench = assign('(feature, latlng, context) => window.drawBench(feature, latlng, context)') 
