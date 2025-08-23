@@ -108,7 +108,8 @@ body {
   background: transparent; /* no background box */
   border: none;             /* no border */
   padding: 0;               /* remove padding */
-  box-shadow: none;         /* no shadow box */
+  box-shadow: none; 
+  text-align: center;        /* no shadow box */
 
   color: black;             /* main text color */
   font-size: 14px;
