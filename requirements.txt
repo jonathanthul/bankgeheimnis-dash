@@ -2,3 +2,4 @@ dash
 dash-leaflet
 dash-extensions
 gunicorn
+shapely
