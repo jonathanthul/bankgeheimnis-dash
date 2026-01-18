@@ -95,7 +95,7 @@ app.layout = html.Div([
             updatemode='mouseup',
         ),
         dcc.Checklist(
-            options=[{"label": "Kiffen erlaubt", "value": "kiffen"}],
+            options=[{"label": "Rauchen erlaubt", "value": "kiffen"}],
             value=[],
             id="kiffen-checkbox"
         ),
