@@ -74,23 +74,23 @@ app.layout = html.Div([
     dcc.Store(id="filtered-benches-store"),
     html.Button("☰", id="toggle-button", n_clicks=0, className="toggle-btn"),
     html.Div(id="control-panel", children=[
-        html.Label("Entfernung zur nächsten öff. Toilette", htmlFor="toilet_slider"),
+        html.Label("Entfernung zur nächsten öff. Toilette (m)", htmlFor="toilet_slider"),
         dcc.RangeSlider(
-            min=0, max=5000, step=10, value=[0,200], marks=None, tooltip={"placement": "bottom", "always_visible": True, "style": {"color": "White", "fontSize": "14px"}, "template": "{value} m"},
+            min=0, max=5000, step=10, value=[0,200], marks=None,
             id="toilet-slider",
             updatemode='mouseup' #only updates when the user stops clicking, avoiding redrawing constantly
             #marks=None,
             #tooltip={"placement": "bottom", "always_visible": True}
         ),
-        html.Label("Entfernung zum nächsten Laden", htmlFor="shop_slider"),
+        html.Label("Entfernung zum nächsten Laden (m)", htmlFor="shop_slider"),
         dcc.RangeSlider(
-            min=0, max=5000, step=10, value=[0,300], marks=None, tooltip={"placement": "bottom", "always_visible": True, "style": {"color": "White", "fontSize": "14px"}, "template": "{value} m"},
+            min=0, max=5000, step=10, value=[0,300], marks=None,
             id="shop-slider",
             updatemode='mouseup'
         ),
-        html.Label("Entfernung zur nächsten großen Straße", htmlFor="street_slider"),
+        html.Label("Entfernung zur nächsten großen Straße (m)", htmlFor="street_slider"),
         dcc.RangeSlider(
-            min=0, max=5000, step=10, value=[0,1000], marks=None, tooltip={"placement": "bottom", "always_visible": True, "style": {"color": "White", "fontSize": "14px"}, "template": "{value} m"},
+            min=0, max=5000, step=10, value=[0,1000], marks=None,
             id="street-slider",
             updatemode='mouseup',
         ),
