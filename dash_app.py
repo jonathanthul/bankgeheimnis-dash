@@ -181,6 +181,8 @@ def update_class(state):
     Input("map", "bounds"),
 )
 def update_nichtkiffen_layer(checkbox_value, map_bounds):
+    # doesn't seem to get any input
+    if map_bounds: print(f"Nonempty map bounds! 😍 {map_bounds}")
     nichtkiffen_layer = dl.GeoJSON(data=nichtkiffen_geojson, options=dict(style=dict(color="red", weight=1, fillOpacity=0.05))) if checkbox_value else None
     return nichtkiffen_layer
 

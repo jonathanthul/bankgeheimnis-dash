@@ -8,8 +8,8 @@ window.drawBench = function(feature, latlng, context){
 
             // bench icon depends on kiffen_erlaubt
             const kiffen_erlaubt = feature && feature.properties && feature.properties.kiffen_erlaubt;
-            const iconUrl = id === window.__lastSelectedBench ? (kiffen_erlaubt ? "assets/bench_kiffen_selected.png" : "assets/bench_selected.png") : (kiffen_erlaubt ? "assets/bench_kiffen.png":"assets/bench.png");
-            //const iconUrl = kiffen_erlaubt ? "assets/bench_kiffen.png" : "assets/bench.png";
+            const iconUrl = id === window.__lastSelectedBench ? (kiffen_erlaubt ? "assets/bench_rauchen_selected.png" : "assets/bench_selected.png") : (kiffen_erlaubt ? "assets/bench_rauchen.png":"assets/bench.png");
+            //const iconUrl = kiffen_erlaubt ? "assets/bench_rauchen.png" : "assets/bench.png";
             const flag = L.icon({
                 iconUrl: iconUrl,
                 iconSize: [48, 48],
@@ -167,14 +167,14 @@ window.drawBench = function(feature, latlng, context){
                     const prevMarker = window.__lastSelectedMarker;
                     const prevKiffen = prevMarker.options.icon.options.iconUrl.includes("kiffen");
                     prevMarker.setIcon(L.icon({
-                        iconUrl: prevKiffen ? "assets/bench_kiffen.png" : "assets/bench.png",
+                        iconUrl: prevKiffen ? "assets/bench_rauchen.png" : "assets/bench.png",
                         iconSize: [48,48], iconAnchor: [24, 48], popupAnchor: [0, -16]
                     })
                     )
                 }
                 window.__lastSelectedMarker = marker;
                 // updates the last clicked markers icon to reflect selection
-                const newIconUrl = id === window.__lastSelectedBench ? (kiffen_erlaubt ? "assets/bench_kiffen_selected.png" : "assets/bench_selected.png") : (kiffen_erlaubt ? "assets/bench_kiffen.png":"assets/bench.png");
+                const newIconUrl = id === window.__lastSelectedBench ? (kiffen_erlaubt ? "assets/bench_rauchen_selected.png" : "assets/bench_selected.png") : (kiffen_erlaubt ? "assets/bench_rauchen.png":"assets/bench.png");
                 marker.setIcon(L.icon({
                     iconUrl: newIconUrl,
                     iconSize: [48, 48],
